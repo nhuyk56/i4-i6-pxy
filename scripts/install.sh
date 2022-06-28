@@ -89,6 +89,7 @@ install_3proxy
 echo "working folder = /home/proxy-installer"
 WORKDIR="/home/proxy-installer"
 WORKDATA="${WORKDIR}/data.txt"
+rm -rf $WORKDIR
 mkdir $WORKDIR && cd $_
 
 IP4=$(curl -4 -s icanhazip.com)
