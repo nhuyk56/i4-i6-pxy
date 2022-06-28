@@ -117,15 +117,14 @@ chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 cat >>/etc/rc.local <<EOF
-bash ${WORKDIR}/inject_port.sh
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 service 3proxy start
-firewall-cmd --reload
 EOF
-
+bash ${WORKDIR}/inject_port.sh
 bash /etc/rc.local
+firewall-cmd --reload
 
 gen_proxy_file_for_user
 
