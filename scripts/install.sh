@@ -63,7 +63,6 @@ upload_proxy() {
 }
 gen_data() {
     seq $FIRST_PORT $LAST_PORT | while read port; do
-        firewall-cmd --permanent --add-port=$port/tcp
         echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
     done
 }
@@ -71,6 +70,7 @@ gen_data() {
 gen_iptables() {
     cat <<EOF
     $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+    $(awk -F "/" '{print "firewall-cmd --permanent --add-port=" $4 "/tcp"}' ${WORKDATA})
 EOF
 }
 
@@ -79,6 +79,12 @@ gen_ifconfig() {
 $(awk -F "/" '{print "ifconfig enp1s0 inet6 add " $5 "/64"}' ${WORKDATA})
 EOF
 }
+gen_del_ifconfig() {
+    cat <<EOF
+$(awk -F "/" '{print "/sbin/ifconfig enp1s0 inet6 del " $5 "/64"}' ${WORKDATA})
+EOF
+}
+
 echo "installing apps"
 yum -y install gcc net-tools bsdtar zip >/dev/null
 
@@ -103,6 +109,7 @@ LAST_PORT=$(($FIRST_PORT + $COUNT))
 gen_data >$WORKDIR/data.txt
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
+gen_del_ifconfig >$WORKDIR/boot__del_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
@@ -112,6 +119,7 @@ bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
 service 3proxy start
+firewall-cmd --reload
 EOF
 
 bash /etc/rc.local
@@ -119,4 +127,3 @@ bash /etc/rc.local
 gen_proxy_file_for_user
 
 upload_proxy
-firewall-cmd --reload
