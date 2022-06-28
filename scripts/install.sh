@@ -77,8 +77,6 @@ EOF
 gen_iptables() {
     cat <<EOF
     $(awk -F "/" '{print "\niptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
-    $(awk -F "/" '{print "\n/sbin/ifconfig enp1s0 inet6 del " $5 "/64"}' ${WORKDATA})
-    $(awk -F "/" '{print "\nfirewall-cmd --permanent --add-port=" $4 "/tcp"}' ${WORKDATA})
 EOF
 }
 
