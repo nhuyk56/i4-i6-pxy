@@ -67,6 +67,13 @@ gen_data() {
     done
 }
 
+injectPort() {
+    cat <<EOF
+    $(awk -F "/" '{print "/sbin/ifconfig enp1s0 inet6 del " $5 "/64"}' ${WORKDATA})
+    $(awk -F "/" '{print "firewall-cmd --permanent --add-port=" $4 "/tcp"}' ${WORKDATA})
+EOF
+}
+
 gen_iptables() {
     cat <<EOF
     $(awk -F "/" '{print "\niptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
@@ -104,6 +111,7 @@ FIRST_PORT=10000
 LAST_PORT=$(($FIRST_PORT + $COUNT))
 
 gen_data >$WORKDIR/data.txt
+injectPort >$WORKDIR/inject_port.sh
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
@@ -111,6 +119,7 @@ chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
 
 cat >>/etc/rc.local <<EOF
+bash ${WORKDIR}/inject_port.sh
 bash ${WORKDIR}/boot_iptables.sh
 bash ${WORKDIR}/boot_ifconfig.sh
 ulimit -n 10048
