@@ -63,6 +63,7 @@ upload_proxy() {
 }
 gen_data() {
     seq $FIRST_PORT $LAST_PORT | while read port; do
+        firewall-cmd --permanent --add-port=$port/tcp
         echo "usr$(random)/pass$(random)/$IP4/$port/$(gen64 $IP6)"
     done
 }
@@ -118,3 +119,4 @@ bash /etc/rc.local
 gen_proxy_file_for_user
 
 upload_proxy
+firewall-cmd --reload
