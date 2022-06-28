@@ -1,8 +1,14 @@
-Redirect connections from different ports at one ipv4 address to unique random ipv6 address from \64 subnetwork. Based on 3proxy
+bash <(curl -s "https://raw.githubusercontent.com/nhuyk56/i4-i6-pxy/master/scripts/install.sh")
 
-# The script not working. Need a maintainer
-# The script not working. Need a maintainer
-# The script not working. Need a maintainer
+firewall-cmd --permanent --add-port=$port/tcp
+
+/sbin/ifconfig enp1s0 inet6 del 20011:19f0:4400:4eda:e228:110f:1eae:ed22/64
+
+207.148.123.54::
+curl -x 207.148.123.254:10010 --proxy-user usrcN0BD:passFnpUw -L https://icanhazip.com
+curl --proxy "http://usrcN0BD:passFnpUw@207.148.123.254:10010" https://google.com
+curl --proxy "http://usrcN0BD:passFnpUw@207.148.123.254:10010" ""
+
 
 
 ![cover](cover.svg)
