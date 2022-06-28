@@ -69,19 +69,15 @@ gen_data() {
 
 gen_iptables() {
     cat <<EOF
-    $(awk -F "/" '{print "iptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
-    $(awk -F "/" '{print "firewall-cmd --permanent --add-port=" $4 "/tcp"}' ${WORKDATA})
+    $(awk -F "/" '{print "\niptables -I INPUT -p tcp --dport " $4 "  -m state --state NEW -j ACCEPT"}' ${WORKDATA}) 
+    $(awk -F "/" '{print "\n/sbin/ifconfig enp1s0 inet6 del " $5 "/64"}' ${WORKDATA})
+    $(awk -F "/" '{print "\nfirewall-cmd --permanent --add-port=" $4 "/tcp"}' ${WORKDATA})
 EOF
 }
 
 gen_ifconfig() {
     cat <<EOF
 $(awk -F "/" '{print "ifconfig enp1s0 inet6 add " $5 "/64"}' ${WORKDATA})
-EOF
-}
-gen_del_ifconfig() {
-    cat <<EOF
-$(awk -F "/" '{print "/sbin/ifconfig enp1s0 inet6 del " $5 "/64"}' ${WORKDATA})
 EOF
 }
 
@@ -109,7 +105,6 @@ LAST_PORT=$(($FIRST_PORT + $COUNT))
 gen_data >$WORKDIR/data.txt
 gen_iptables >$WORKDIR/boot_iptables.sh
 gen_ifconfig >$WORKDIR/boot_ifconfig.sh
-gen_del_ifconfig >$WORKDIR/boot__del_ifconfig.sh
 chmod +x ${WORKDIR}/boot_*.sh /etc/rc.local
 
 gen_3proxy >/usr/local/etc/3proxy/3proxy.cfg
@@ -127,4 +122,3 @@ bash /etc/rc.local
 gen_proxy_file_for_user
 
 upload_proxy
-sudo nano $WORKDIR/proxy.txt
